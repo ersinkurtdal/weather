@@ -1,0 +1,16 @@
+{
+  "name": "eapp-weather",
+  "version": "1.0.0",
+  "description": "Weather Application with Nodejs - Shows the weather condition by user ip address",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "author": "Ersin Kurtdal",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3",
+    "hbs": "^4.0.1",
+    "request": "^2.87.0"
+  }
+}
