@@ -5,7 +5,7 @@ This application uses http://ip-api.com/, https://darksky.net/dev api services f
 Please change googleApiKey and weatherSecretKey in config.js file.
 
 ### Demo ###
-https://eapp.heroku-app.com
+https://eapp.herokuapp.com
 
 ### License ###
 The plugin is available under the <a href="http://opensource.org/licenses/MIT">MIT license</a>.
