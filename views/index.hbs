@@ -10,7 +10,7 @@
   <style>
     body{font-family:'Ubuntu', sans-serif;font-size:15px;font-weight:300;padding-top:60px}
     h1, h2, h3, h4, h5, h6, strong{font-weight:400}
-    #info{
+    .panel{
       -webkit-box-shadow: 0px 0px 50px 0px rgb(230,230,230);
       -moz-box-shadow: 0px 0px 50px 0px rgb(230,230,230);
       box-shadow: 0px 0px 50px 0px rgb(230,230,230)
@@ -31,15 +31,20 @@
   <div class="container">
     <div class="row">
       <div class="col-xs-push-1 col-xs-10 col-sm-push-3 col-sm-6 col-md-push-4 col-md-4">
-        <div id="info" class="panel panel-default">
-            <div class="panel-body">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="text-center">Weather Application</h3>
+            </div> <!-- /panel-heading -->
+            <div id="info" class="panel-body">
               <div class="text-center">
-                <h3>Weather Application</h3>
                 <p><i class="fa fa-cog fa-spin"></i> Loading...</p>
               </div>
             </div> <!-- /panel-body -->
+            <div class="panel-footer">
+              <a href="https://www.kurtdal.com" target="_blank" class="small">Ersin Kurtdal</a>
+              <a href="https://github.com/ersinkurtdal/weather" target="_blank" title="Fork me on Github" class="pull-right"><i class="fa fa-github"></i></a>
+            </div> <!-- /panel-footer -->
         </div> <!-- /panel -->
-        <p><a href="https://github.com/ersinkurtdal/weather" target="_blank" title="Fork me on Github" class="pull-right"><i class="fa fa-github"></i></a></p>
       </div> <!-- /col-xs -->
     </div> <!-- /row -->
   </div> <!-- /container -->
@@ -49,21 +54,21 @@
         <h3>Your Ip Address</h3>
         <h4>\{{query}}</h4>
         <div id="weather"><p><i class="fa fa-cog fa-spin"></i> Loading...</p></div>
+        <hr>
       </div>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item">
-          <i class="fa fa-map-marker" title="Address"></i> \{{zip}} / \{{city}} / \{{country}} / \{{countryCode}}</span> <br>
-          <i class="fa fa-location-arrow" title="Latitude & Longitude"></i>  \{{lat}}, \{{lon}} <br>
-          <i class="fa fa-clock-o" title="Timezone"></i> \{{timezone}}
-        </li>
+      <ul class="list-unstyled">
+        <li><i class="fa fa-map-marker" title="Address"></i> \{{zip}} / \{{city}} / \{{country}} / \{{countryCode}}</span></li>
+        <li><i class="fa fa-location-arrow" title="Latitude & Longitude"></i>  \{{lat}}, \{{lon}}</li>
+        <li><i class="fa fa-clock-o" title="Timezone"></i> \{{timezone}}</li>
       </ul>
       <iframe width="100%" height="300" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/place?key={{googleApiKey}}&q=\{{lat}},\{{lon}}&zoom=12" allowfullscreen></iframe>
   </script>
 
   <script id="weatherTemplate" type="text/x-handlebars-template">
     <h3>Weather Condition</h34>
-    <h4><i class="fa fa-thermometer-half"></i> \{{temparature}}&deg;F</h4>
-    <h4>Feels like: \{{apparentTemparature}}&deg;F</h4>
+    <h4><i class="fa fa-thermometer-half"></i> <span>\{{temparature}}&deg;C</span></h4>
+    <h4>Apparent: <span>\{{apparentTemparature}}&deg;C</span></h4>
+    <p><a href="#" data-scale="F"><i class="fa fa-exchange"></i> to <span>F</span></a></p>
   </script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -79,14 +84,44 @@
             $info = $('#info'),
             $weatherTemplate = $('#weatherTemplate');
 
+        /**
+         * Convert scales between Fahrenheit and Celcius
+         * @param data array
+         * @return array
+         */
+        function changeScale(data){
+          if(data[1] == 'C') return [parseFloat(data[0] * 9 / 5 + 32).toFixed(2), 'F'];
+          return [parseFloat((data[0] - 32) * 5 / 9).toFixed(2), 'C'];
+        }
+
+        /**
+         * Finds temparature value and convert it with changeScale
+         * @param e object, event handler
+         * @return void
+         */
+        function changeScaleOperations(e){
+          var $that = $(this);
+
+          $that.data('scale') == 'F' ? $that.data('scale', 'C').find('span').text('C') : $that.data('scale', 'F').find('span').text('F')
+
+          $.each($that.parent('p').siblings('h4'), function(index, el) {
+            let $element = $(el).find('span'),
+                temperature = changeScale($element.text().split('°'));
+
+            $element.html(temperature[0] + '°' + temperature[1]);
+          });
+
+          e.preventDefault;
+        }
+
         $.ajax({
           url: '/location',
           type: 'GET',
           dataType: 'json',
-          success: (location) => {
+          success: function(location) {
 
             if(location.status === 'fail' || location.error)
-              return $info.find('.panel-body').append('Application cannot find your location.');
+              return $info.find('div').append('Application cannot find your location.');
 
             $info.html(Handlebars.compile($template.html())(location));
 
@@ -95,14 +130,20 @@
               type: 'POST',
               data: {lat: location.lat, lon: location.lon},
               dataType: 'json',
-              success: (weather) => {
+              success: function(weather){
                 if(weather.error) return $info.find('#weather').html('Application cannot find your weather condition.<br> Please try again later.');
-                $info.find('#weather').html(Handlebars.compile($weatherTemplate.html())(weather));
+
+                $info
+                  .find('#weather')
+                  .html(Handlebars.compile($weatherTemplate.html())(weather))
+                  .end()
+                  .find('a').on('click', changeScaleOperations);
+
               },
-              error: (msg) => console.log(msg)
+              error: function(msg){console.log(msg)}
             })
           },
-          error: (msg) => console.log(msg)
+          error: function(msg){console.log(msg)}
         })
 
       });

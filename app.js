@@ -5,11 +5,13 @@ const request = require('request') // Request - Simplified HTTP client https://g
 const bodyParser = require('body-parser') // Node.js body parsing middleware
 const config = require('./config.js') // Configuration parameters
 
-app.set('view engine', 'hbs') // set view engine
-app.use(bodyParser.urlencoded({extended:false})); // parser for post elements
+app.set('view engine', 'hbs') // Set view engine
+app.use(bodyParser.urlencoded({extended:false})); // Parser for post elements
 
 /**
  * Json control
+ * @param str string
+ * @return boolean
  */
 var IsJsonString = (str) => {
     try {
@@ -18,13 +20,22 @@ var IsJsonString = (str) => {
         return false;
     }
     return true;
-},
-errorMessage = {"error":"An unexpected error occurred. Please try again later."}
+}
 
 /**
- * Returns user information by ip from http://ip-api.com
+ * fahrenheit celcius convert
+ * @param deg float
+ * @return float
+ */
+var fahrenheitToCelcius = (deg) => parseFloat((deg - 32) * 5 / 9 ).toFixed(2)
+
+var errorMessage = {"error":"An unexpected error occurred. Please try again later."}
+
+/**
+ * Returns user information by user ip from http://ip-api.com
  * 150 requests per minute allowed
  * for more information visit http://ip-api.com/docs/
+ * @return object json
  */
 app.get('/location', (req, res) => {
 
@@ -37,7 +48,7 @@ app.get('/location', (req, res) => {
     // json output check
     if ( IsJsonString(body) ){
       body = JSON.parse(body)
-      if(response && response.statusCode === 200 && body.status){
+      if(response && response.statusCode === 200 && body.status === 'success'){
         return res.json(body)
       }else{
         return res.json(errorMessage)
@@ -52,7 +63,8 @@ app.get('/location', (req, res) => {
 
 /**
  * Returns weather information by latitude and longitude from https://darksky.net/dev
- * Trial account allows up to 1,000 free calls per day to evaluate the Dark Sky API.
+ * Trial account allows up to 1000 free calls per day
+ * @return object json
  */
 app.post('/weather', (req, res) => {
 
@@ -69,8 +81,8 @@ app.post('/weather', (req, res) => {
 
     if( response.statusCode === 200 ){
       return res.json({
-        temparature: body.currently.temperature,
-        apparentTemparature: body.currently.apparentTemperature,
+        temparature: fahrenheitToCelcius(body.currently.temperature),
+        apparentTemparature: fahrenheitToCelcius(body.currently.apparentTemperature),
       })
     }else{
       return res.json({"error": "Unable to fetch weather."});
@@ -80,11 +92,14 @@ app.post('/weather', (req, res) => {
 
 });
 
-// Home page
+/**
+ * Home page
+ * @return text/html
+ */
 app.get('/', (req, res) => {
   return res.render('index.hbs', {
     googleApiKey: config.googleApiKey
   });
 });
 
-app.listen(config.port, () => {console.log(`Weather Application started. Please visit http://127.0.0.1:${config.port}'`)});
+app.listen(config.port, () => {console.log(`Weather Application started. Please visit http://127.0.0.1:${config.port}`)});
