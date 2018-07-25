@@ -6,7 +6,7 @@ const bodyParser = require('body-parser') // Node.js body parsing middleware
 const config = require('./config.js') // Configuration parameters
 
 app.set('view engine', 'hbs') // Set view engine
-app.use(bodyParser.urlencoded({extended:false})); // Parser for post elements
+app.use(bodyParser.urlencoded({extended:false})) // Parser for post elements
 
 /**
  * Json control
@@ -15,11 +15,11 @@ app.use(bodyParser.urlencoded({extended:false})); // Parser for post elements
  */
 var IsJsonString = (str) => {
     try {
-        JSON.parse(str);
+        JSON.parse(str)
     } catch (e) {
-        return false;
+        return false
     }
-    return true;
+    return true
 }
 
 /**
@@ -57,7 +57,7 @@ app.post('/location', (req, res) => {
       return res.json(errorMessage)
     }
 
-  });
+  })
 
 })
 
@@ -77,7 +77,7 @@ app.post('/weather', (req, res) => {
     json: true,
   }, (error, response, body) => {
 
-    if (error) return res.json(errorMessage);
+    if (error) return res.json(errorMessage)
 
     if( response.statusCode === 200 ){
       return res.json({
@@ -85,12 +85,12 @@ app.post('/weather', (req, res) => {
         apparentTemparature: fahrenheitToCelcius(body.currently.apparentTemperature),
       })
     }else{
-      return res.json({"error": "Unable to fetch weather."});
+      return res.json({"error": "Unable to fetch weather."})
     }
 
-  });
+  })
 
-});
+})
 
 /**
  * Home page
@@ -99,7 +99,7 @@ app.post('/weather', (req, res) => {
 app.get('/', (req, res) => {
   return res.render('index.hbs', {
     googleApiKey: config.googleApiKey
-  });
-});
+  })
+})
 
-app.listen(config.port, () => {console.log(`Weather Application started. Please visit http://127.0.0.1:${config.port}`)});
+app.listen(config.port, () => {console.log(`Weather Application started. Please visit http://127.0.0.1:${config.port}`)})
