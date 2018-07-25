@@ -49,7 +49,7 @@
         <h3>Your Ip Address</h3>
         <h4>\{{query}}</h4>
         <div id="weather"><p><i class="fa fa-cog fa-spin"></i> Loading...</p></div>
-      </div> <!-- card-body -->
+      </div>
       <ul class="list-group list-group-flush">
         <li class="list-group-item">
           <i class="fa fa-map-marker" title="Address"></i> \{{zip}} / \{{city}} / \{{country}} / \{{countryCode}}</span> <br>
@@ -85,8 +85,8 @@
           dataType: 'json',
           success: (location) => {
 
-            if(location.status == 'fail' || location.error)
-              return $info.find('.card-body').append('Application cannot find your location.');
+            if(location.status === 'fail' || location.error)
+              return $info.find('.panel-body').append('Application cannot find your location.');
 
             $info.html(Handlebars.compile($template.html())(location));
 
