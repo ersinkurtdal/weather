@@ -37,7 +37,7 @@ var errorMessage = {"error":"An unexpected error occurred. Please try again late
  * for more information visit http://ip-api.com/docs/
  * @return object json
  */
-app.get('/location', (req, res) => {
+app.post('/location', (req, res) => {
 
   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress // get user ip
 
