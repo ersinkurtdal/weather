@@ -48,14 +48,10 @@ app.post('/location', (req, res) => {
     // json output check
     if ( IsJsonString(body) ){
       body = JSON.parse(body)
-      if(response && response.statusCode === 200 && body.status === 'success'){
-        return res.json(body)
-      }else{
-        return res.json(errorMessage)
-      }
-    }else{
-      return res.json(errorMessage)
+      if(response && response.statusCode === 200 && body.status === 'success') return res.json(body)
     }
+
+    return res.json(errorMessage)
 
   })
 
@@ -79,14 +75,13 @@ app.post('/weather', (req, res) => {
 
     if (error) return res.json(errorMessage)
 
-    if( response.statusCode === 200 ){
+    if( response.statusCode === 200 )
       return res.json({
         temparature: fahrenheitToCelcius(body.currently.temperature),
         apparentTemparature: fahrenheitToCelcius(body.currently.apparentTemperature),
       })
-    }else{
-      return res.json({"error": "Unable to fetch weather."})
-    }
+
+    return res.json({"error": "Unable to fetch weather."})
 
   })
 
