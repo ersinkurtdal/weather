@@ -14,17 +14,18 @@ app.use(bodyParser.urlencoded({extended:false})); // Parser for post elements
  * @return boolean
  */
 const IsJsonString = str => {
-    try {
-        JSON.parse(str);
-    } catch (e) {
-        return false;
-    }
-    return true;
+	try {
+		JSON.parse(str);
+	} catch (e) {
+		return false;
+	}
+	return true;
 };
 
 /**
- * fahrenheit celcius convert
- * @param deg float
+ * fahrenheit to celcius
+ * @param {float} deg
+ * 
  * @return float
  */
 const fahrenheitToCelcius = deg => parseFloat((deg - 32) * 5 / 9 ).toFixed(2);
@@ -35,25 +36,26 @@ const errorMessage = {"error":"An unexpected error occurred. Please try again la
  * Returns user information by user ip from http://ip-api.com
  * 150 requests per minute allowed
  * for more information visit http://ip-api.com/docs/
- * @return object json
+ * 
+ * @return {object}
  */
 app.post('/location', (req, res) => {
 
-  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress; // get user ip
+	const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress; // get user ip
 
-  request(`http://ip-api.com/json/${ip}`, (error, response, body) => {
+	request(`http://ip-api.com/json/${ip}`, (error, response, body) => {
 
-    if(error) return res.json(errorMessage);
+		if(error) return res.json(errorMessage);
 
-    // json output check
-    if ( IsJsonString(body) ){
-      body = JSON.parse(body);
-      if(response && response.statusCode === 200 && body.status === 'success') return res.json(body);
-    }
+		// json output check
+		if (IsJsonString(body)){
+			body = JSON.parse(body);
+			if(response && response.statusCode === 200 && body.status === 'success') return res.json(body);
+		}
 
-    return res.json(errorMessage);
+		return res.json(errorMessage);
 
-  });
+	});
 
 });
 
@@ -64,26 +66,27 @@ app.post('/location', (req, res) => {
  */
 app.post('/weather', (req, res) => {
 
-  const lat = parseFloat(req.body.lat), lon = parseFloat(req.body.lon);
+	const lat = parseFloat(req.body.lat), 
+		lon = parseFloat(req.body.lon);
 
-  if( ! lat && ! lon ) return res.json({"error": "Please provide latitude and longitude."});
+	if(!lat && !lon) return res.json({"error": "Please provide latitude and longitude."});
 
-  request({
-    url: `https://api.darksky.net/forecast/${config.weatherSecretKey}/${lat},${lon}`,
-    json: true,
-  }, (error, response, body) => {
+	request({
+		url: `https://api.darksky.net/forecast/${config.weatherSecretKey}/${lat},${lon}`,
+		json: true,
+	}, (error, response, body) => {
 
-    if (error) return res.json(errorMessage);
+		if (error) return res.json(errorMessage);
 
-    if( response.statusCode === 200 )
-      return res.json({
-        temparature: fahrenheitToCelcius(body.currently.temperature),
-        apparentTemparature: fahrenheitToCelcius(body.currently.apparentTemperature),
-      });
+		if(response.statusCode === 200)
+			return res.json({
+				temparature: fahrenheitToCelcius(body.currently.temperature),
+				apparentTemparature: fahrenheitToCelcius(body.currently.apparentTemperature),
+			});
 
-    return res.json({"error": "Unable to fetch weather."});
+		return res.json({"error": "Unable to fetch weather."});
 
-  });
+	});
 
 });
 
@@ -92,9 +95,9 @@ app.post('/weather', (req, res) => {
  * @return text/html
  */
 app.get('/', (req, res) => {
-  return res.render('index.hbs', {
-    googleApiKey: config.googleApiKey
-  });
+	return res.render('index.hbs', {
+		googleApiKey: config.googleApiKey
+	});
 });
 
-app.listen(config.port, () => {console.log(`Weather Application started. Please visit http://127.0.0.1:${config.port}`)});
+app.listen(config.port, () => {console.info(`Weather Application started. Please visit http://127.0.0.1:${config.port}`)});
